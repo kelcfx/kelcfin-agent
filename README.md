@@ -1,88 +1,209 @@
 # KELCfin Agent
 
-### AI-powered Telegram Assistant
+**A Telegram-controlled AI assistant powered by Cloudflare Workers and Google Gemini.**
 
-KELCfin Agent is a personal AI assistant designed to go beyond conversational responses by combining artificial intelligence, web research, browser automation, and persistent conversational memory.
+KELCfin Agent is a serverless AI assistant designed to help with research, information retrieval, browser-based tasks, programming, and general productivity through Telegram.
 
-I independently designed, developed, deployed, and tested this project, working with limited resources and without a dedicated development team.
+The project uses Cloudflare Workers as its execution environment and integrates AI models and external services to extend its capabilities.
 
-## Overview
+## Project Overview
 
-The project was built to explore how AI could be used as a practical assistant capable of answering questions, researching information, retaining conversational context, and assisting with browser-based tasks.
+KELCfin Agent provides a conversational interface through Telegram, allowing its authorized owner to interact with an AI assistant without needing to access the underlying Cloudflare Worker directly.
 
-The system operates through Telegram, with its backend deployed on Cloudflare Workers.
+The agent uses an adaptive model-routing approach to select between fast and more capable AI models, depending on the task.
 
 ## Features
 
-- **AI conversation:** AI-powered responses through Google's Gemini models.
-- **Adaptive model routing:** Routes requests between AI models based on task complexity.
-- **Web research:** Retrieves information using Tavily.
-- **Browser automation:** Uses Browserless to facilitate browser-based interaction and automation.
-- **Persistent memory:** Uses Cloudflare KV to preserve conversational context.
-- **Telegram integration:** Provides an accessible interface for interacting with the agent.
-- **Cloud deployment:** Runs on Cloudflare Workers without requiring a dedicated server.
+- **Telegram Integration:** Interact with the assistant through Telegram commands and messages.
+- **Adaptive AI Routing:** Routes requests between fast and smart Gemini models.
+- **Web Research:** Uses Tavily to search for relevant online information.
+- **Browser Automation:** Integrates Browserless for browser-based navigation and interaction.
+- **Browser Planning:** Uses AI-generated plans to guide supported browser actions.
+- **Verified Form Interaction:** Supports browser form interaction with action verification.
+- **Conversation Memory:** Uses Cloudflare KV to retain conversation context.
+- **Owner Authorization:** Restricts access to authorized Telegram users.
+- **Command Interface:** Provides dedicated commands for research, browsing, model selection, and agent management.
+- **Serverless Deployment:** Runs on Cloudflare Workers without requiring a dedicated VPS.
 
 ## Technology Stack
 
 | Technology | Purpose |
 |---|---|
-| Cloudflare Workers | Backend hosting and execution |
-| Cloudflare KV | Persistent conversational memory |
-| Google Gemini | AI reasoning and responses |
+| JavaScript | Application logic |
+| Cloudflare Workers | Serverless execution environment |
+| Cloudflare KV | Conversation and application state |
 | Telegram Bot API | User interaction |
-| Tavily | Web research |
+| Google Gemini | AI reasoning and responses |
+| Tavily | Web search and research |
 | Browserless | Browser automation |
 
 ## Architecture
 
-The system follows a connected workflow:
+```text
+Telegram User
+      |
+      v
+Telegram Bot API
+      |
+      v
+Cloudflare Worker
+      |
+      +---- Google Gemini
+      |       |
+      |       +---- Fast Model
+      |       +---- Smart Model
+      |
+      +---- Tavily Web Research
+      |
+      +---- Browserless
+      |       |
+      |       +---- Browser Navigation
+      |       +---- Page Interaction
+      |       +---- Form Interaction
+      |
+      +---- Cloudflare KV
+              |
+              +---- Conversation Memory
+              +---- Application State
+```
 
-1. A user sends a message through Telegram.
-2. The Telegram integration forwards the message to the deployed backend.
-3. The backend evaluates the request and selects the appropriate AI processing route.
-4. Gemini processes the request.
-5. When needed, the system can use web research or browser automation capabilities.
-6. Conversation context is stored and retrieved through Cloudflare KV.
-7. The resulting response is returned to the user through Telegram.
+## Available Commands
 
-## My Role
+The agent supports the following Telegram commands:
 
-I handled the project independently, including:
+| Command | Description |
+|---|---|
+| `/start` | Start interacting with the bot |
+| `/help` | Display available commands |
+| `/status` | Display agent status and configuration |
+| `/agent` | Access agent functionality |
+| `/browse` | Start a browser-related task |
+| `/click` | Perform a supported browser click action |
+| `/type` | Enter text into a supported browser field |
+| `/browser` | Access browser controls |
+| `/search` | Search for information |
+| `/research` | Perform web research |
+| `/read` | Retrieve and read webpage content |
+| `/fast` | Select fast AI response mode |
+| `/smart` | Select smart AI response mode |
+| `/auto` | Enable automatic model routing |
+| `/reset` | Reset conversation context |
 
-- Identifying the use case and defining the system's capabilities.
-- Researching and selecting the technologies.
-- Designing the backend architecture.
-- Implementing the AI integration and model routing.
-- Integrating web research and browser automation.
-- Implementing persistent conversational memory.
-- Deploying the backend.
-- Testing, debugging, and resolving integration issues.
+*Command availability and behavior depend on the deployed Worker configuration.*
 
-## Challenges and Problem-Solving
+## Deployment
 
-One of the main challenges was integrating multiple services with different APIs, requirements, and limitations into a single functioning system.
+KELCfin Agent is designed to run on Cloudflare Workers.
 
-During development, I encountered API rate limits, service failures, integration errors, and implementation conflicts. I investigated these issues, modified the implementation, tested different approaches, and improved the system's reliability through troubleshooting and iterative development.
+### Requirements
 
-I also had to learn unfamiliar technologies while developing the project, which required independent research, experimentation, and continuous learning.
+Before deploying, you will need:
 
-## What I Learned
+- A Cloudflare account.
+- A Telegram bot created through BotFather.
+- A Google Gemini API key.
+- A Tavily API key.
+- A Browserless API key.
+- A Cloudflare KV namespace.
 
-- Designing systems that integrate multiple services.
-- Working with APIs and serverless infrastructure.
-- AI model integration and routing.
-- Debugging complex integration issues.
-- Browser automation concepts.
-- Iterative development and testing.
-- Learning unfamiliar technical skills independently.
+### Environment Variables
+
+Configure the following environment variables in your Cloudflare Worker settings:
+
+| Variable | Purpose |
+|---|---|
+| `TELEGRAM_BOT_TOKEN` | Telegram bot authentication |
+| `TELEGRAM_WEBHOOK_SECRET` | Telegram webhook verification |
+| `TELEGRAM_OWNER_ID` | Authorized Telegram user ID |
+| `GEMINI_API_KEY` | Google Gemini API access |
+| `TAVILY_API_KEY` | Tavily search access |
+| `BROWSERLESS_API_KEY` | Browserless API access |
+
+### Cloudflare KV Binding
+
+Create a Cloudflare KV namespace and bind it to the Worker using the binding name:
+
+`STATE`
+
+The application uses this binding for conversation memory and application state.
+
+### Deployment Steps
+
+1. Create a Cloudflare account.
+2. Create a new Cloudflare Worker.
+3. Add the project source code.
+4. Create the required KV namespace.
+5. Configure the `STATE` KV binding.
+6. Add the required environment variables and secrets.
+7. Deploy the Worker.
+8. Configure the Telegram webhook to point to the Worker’s Telegram endpoint.
+9. Test the bot through Telegram.
+
+## Worker Endpoints
+
+| Endpoint | Purpose |
+|---|---|
+| `/` | Main application endpoint |
+| `/health` | Health check |
+| `/setup` | Setup endpoint |
+| `/telegram` | Telegram webhook endpoint |
+
+## Configuration
+
+The current source configuration uses:
+
+- Fast model: `gemini-3.5-flash-lite`
+- Smart model: `gemini-3.8-flash`
+- Automatic model routing
+- Maximum agent rounds: 3
+- Maximum agent actions: 4
+- Browser operation timeout: 25 seconds
+- Model response timeout: 12 seconds
+- Telegram message limit: 3,900 characters
+- Conversation history limit: 10 messages
+
+These are application configuration values and may be adjusted as the project develops.
+
+## Security
+
+Security is an important consideration in the design and deployment of KELCfin Agent.
+
+The project incorporates:
+
+- Telegram owner authorization.
+- Webhook secret verification.
+- Environment-based credential management.
+- Browser URL validation.
+- Browser action validation against available page information.
+- Duplicate Telegram update protection.
+- Conversation state management.
+
+**Important:** Never publish API keys, bot tokens, webhook secrets, or other private credentials in a public repository. Store sensitive values in Cloudflare Worker environment variables and secrets.
+
+Browser automation should be used responsibly. Review actions before allowing automation to interact with sensitive accounts, submit important forms, or perform consequential operations.
 
 ## Project Status
 
-The agent is deployed and connected to Telegram. Core integrations have been implemented and tested.
+**Version:** 2.7.2
 
-This project represents an ongoing exploration of AI agents, automation, and practical applications of artificial intelligence.
+**Deployment Platform:** Cloudflare Workers
+
+**Interface:** Telegram
+
+**Project Type:** Personal AI Assistant
+
+The repository contains the application source code for the KELCfin Agent project. Features and integrations may evolve as development continues.
+
+## Repository
+
+GitHub: https://github.com/kelcfx/kelcfin-agent
+
+## Author
+
+**KELCfin**
+
+An independent project focused on building practical AI-powered tools and automation workflows.
 
 ---
 
-**Developer:** KELCfin  
-**Project:** KELCfin Agent
+*Built with JavaScript, Cloudflare Workers, Google Gemini, Telegram, Tavily, and Browserless.*
